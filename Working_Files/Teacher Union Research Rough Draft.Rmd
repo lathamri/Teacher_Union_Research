@@ -1,0 +1,322 @@
+---
+title: "Teacher Union Wage Effects Rough Draft"
+author: 'Riley Latham'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(stargazer)
+library(dplyr)
+```
+
+# Abstract
+This paper examines the relationship between the strength of teachers union and their impact on instructor wages at the district level. I use data from the 1999-2000 School and Staffing Survey (SASS) along with fiscal data from Common Core Data (CCD). I develop a proxy measure for union strength at the district level and find that stronger unions yield an expected increase of 3.89% in teachers' first year salaries. Further I find strong unions have returns as high as 4.7% for the first 10 years of experience compared to their weaker counterparts. 
+
+# 1. Introduction
+American unions have been in decline since their heyday in the 1970's and 1980's; regardless, teachers unions remain an important part of the American education system and play a large role in the development of education policies. Many studies have worked to estimate teacher union impact on student achievement (Hoxby(1996), Eberts(2007)) as well as the union wage effect (Merkle and Phillips, 2017), but despite large amounts of research regarding the effect of teachers unions in general, few have explored the impact of union strength on instructor wages. Teachers unions have, in some cases, been accused of stifling progress and costing tax-payers undue money (Eberts, 2007). However, they operate and largely bargain at a district level which gives evidence to suggest the heterogeneity of teachers unions with respect to size, effect on outcomes, bargaining power and more; because of this heterogeneity we suspect there exists an underlying relationship between union strength and teacher compensation.
+
+Teachers wages are most commonly decided with a pay schedule relying largely on total education and years of experience, but teacher compensation is not defined entirely by wages. Benefits such as life, dental, and medical insurance are all relevant to employment contracts and teacher compensation is unique in the non-pecuniary inputs. This study also considers the urbanicity of a district, racial composition of students and faculty, indicators of the district's economic health, and more. These inputs are discussed in depth in section 2. Using observed characteristics from the School and Staffing Survey we're able to reliably estimate teacher wages and determine the effect of union strength on teacher compensation.
+
+This paper attempts to quantify the relationship between strong unions and teacher pay across varying levels to education and experience. The findings indicate strong unions increase pay as much as 4.7% when compared to weaker unions. We also see a significant difference in wage increases comparing the various combinations of education and experience suggesting strong unions may provide different incentives to higher education than weaker ones.
+
+```{r, include=FALSE}
+SASS = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/SASS data/Clean_SASS.csv')
+
+CCD = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD.csv')
+
+SASS_CCD = merge(SASS, CCD, by.x="CCDIDLEA", by.y="LEAID")
+
+SASS_CCD$StateUnionRank = NULL
+
+tier_1 = c('HAWAII', 'OREGON', 'MONTANA', 'PENNSYLVANIA', 'RHODE ISLAND', 'CALIFORNIA', 'NEW JERSEY', 'ILLINOIS', 'NEW YORK', 'WASHINGTON')
+tier_2 = c('VERMONT', 'OHIO', 'WEST VIRGINIA', 'MINNESOTA', 'ALASKA', 'MICHIGAN', 'CONNECTICUT', 'WISCONSIN', 'DELAWARE', 'ALABAMA')
+tier_3 = c('MASSACHUSETTS', 'MAINE', 'MARYLAND', 'NORTH DAKOTA', 'NEVADA', 'NEBRASKA', 'IOWA', 'KENTUCKY', 'WYOMING', 'NEW HAMPSHIRE', 'INDIANA')
+tier_4 = c('KANSAS', 'DISTRICT OF COLUMBIA', 'SOUTH DAKOTA', 'COLORADO', 'IDAHO', 'NEW MEXICO', 'MISSOURI', 'UTAH', 'NORTH CAROLINA', 'TENNESSEE')
+tier_5 = c('LOUISIANA', 'OKLAHOMA', 'TEXAS', 'GEORGIA', 'MISSISSIPPI', 'VIRGINIA', 'ARKANSAS', 'SOUTH CAROLINA', 'FLORIDA', 'ARIZONA')
+
+SASS_CCD$StateUnionRank[SASS_CCD$STNAME %in% tier_1] = 1
+SASS_CCD$StateUnionRank[SASS_CCD$STNAME %in% tier_2] = 2
+SASS_CCD$StateUnionRank[SASS_CCD$STNAME %in% tier_3] = 3
+SASS_CCD$StateUnionRank[SASS_CCD$STNAME %in% tier_4] = 5
+SASS_CCD$StateUnionRank[SASS_CCD$STNAME %in% tier_5] = 5
+
+SASS_CCD = SASS_CCD[!(SASS_CCD$UnionAgreement==2),]
+
+```
+# 2. Data and Methodology
+## 2.1 Data
+This study utilizes the School and Staffing Survey (SASS) dataset from 1999-2000, the most recent publicly available data from the National Center for Educational Statistics (NCES), as the primary source of data. The collection process is thorough and gives reliable and accurate insight into each district.[^1] It captures data from more than 4,000 school districts across the United States with access to unionization, population, and pay schedule information. The SASS dataset provides pay schedule data that allows my analysis to find the effect of union strength on teachers of varying tenure and levels of higher education, the two most commonly used indicators of pay schedule increases. We use a subset of this data capturing only those districts that are unionized, providing us with more than 3,000 districts across the US to analyze.
+
+I also use a Common Core Data (CCD) dataset regarding fiscal data at the district level from 1999-2000 as a way of holding district financial effects constant. The dataset provides a breakdown of district revenues and expenditures for nearly all of our SASS districts leaving us still with more than 3,000 districts for analysis. The breakdown includes benefit and salary expenditures to compliment the SASS data and provides novel information on capital outlay spending.[^2] By coupling the data we're able to better hold community effects constant, providing a more accurate estimate of the effect union strength has on wages.
+
+Unfortunately the data does not provide any information regarding performance based or merit based pay and does not provide the entirety of the pay schedule. The data instead offers pay schedule information for the following: a bachelors with no experience, a bachelors with 10 years of experience, a masters degree with no experience, a masters with 30 credits, and a masters degree with 20 years of experience. While this is far from a complete pay schedule it allows us to analyze key points that will provide insight as to the effect of union strength on teacher wages.
+
+I've summarized our dependent variables data here.
+```{r Data Summary, include=FALSE}
+
+SASS_CCD = SASS_CCD[!(SASS_CCD$BA.10yrs==-8),]
+
+ed_exp_SASS_CCD = SASS_CCD[c('BA.NoExp', 'BA.10yrs', 'MS.NoExp', 'MS.30Cr', 'MS.20yrs')]
+```
+
+```{r summary table, echo=F,results="asis"}
+
+stargazer(ed_exp_SASS_CCD, type='latex', summary.stat=c('sd', 'median', 'min', 'p25', 'mean', 'p75', 'max'), title='Teacher Wages Summary Table', notes.label='')
+
+```
+
+[^1]: For more information please visit https://nces.ed.gov/surveys/sass/methods9900.asp
+
+[^2]: Capital outlay, as defined by the CCD, is the direct expenditure for construction of buildings, roads, and other improvements, and for purchases of equipment, land, and existing structures. Includes amounts for additions, replacements, and major alterations to fixed works and structures.
+
+## 2.2 Methodology
+I use a model similar to (West and Mykerezi, 2009) to estimate the effects of union strength on teacher pay. We estimate teacher pay in district $d$ with teacher characteristics $i$ corresponding to the teachers education and years of experience using a set of vectors to hold constant student, school district, and community effects. The student characteristics include the student body racial composition, eligibility for free or reduced price lunch, the total enrollment of K-12 students in the district, and the number of migrant students. The school district array includes the number of schools, the number of continuing teachers, the core and total expenditures per pupil, the expenditures on instructional salaries, the revenue split by source, total expenditures, the racial composition of teachers, and the benefit rate[^3]. The community array captures the region, state, urbanicity, related children in poverty, national and state size ranking, total population in the district, and capital outlay expenditures. The equation is given as follows.
+
+$$
+Pay_{d,i} = \beta_{0,i} + \beta_{1,i}*Student + \beta_{2,i}*District + \beta_{3,i}*Community + \beta_{4,i}*UnionStrength + \varepsilon
+$$
+
+[^3]: The benefit rate is a constructed measure from SASS that uses spending on all benefits (dental, life, etc.) as inputs and returns the strength of this benefit package.
+
+## 2.3 Measuring Union Strength
+I measure union strength at the district level using two constructions. Firstly we rank the state level union strength using an analysis from (Wenkler, Scull, and Zeehandelaar, 2012) which takes into account five factors. These factors are resources and membership, involvement in politics, scope of bargaining, state policies, and perceived influence. They generate a composite score and rank each state accordingly. Second, due to a lack of available data at this time we measure district level union strength as a function of expenditures on teacher salary, benefits, and community improvements. The following equation creates a proxy measure of union strength.
+
+$$
+UnionStrength = \frac{1}{2}\times ((1-0.2\times S) + ((I+C+B)/T))
+$$
+Where $S$ is state rank, $I$ is instructor salary, $C$ is capital outlay, $B$ is employee benefits, and $T$ is total expenditures. This measure gives equal weight to the state rank and the proxy measure for district level union strength. It returns a value between 0 and 1 that approximates union strength. We then use this value to assign unions to be either strong or weak based on the median strength across all districts. Because $UnionStrength$ is based on ratios of fiscal data and state ranking it is not biased towards larger districts which appropriates the choice to use medians as an assignment factor.
+
+I would like to note there exists new methods of measuring union strength, the Partial Item Independent Response (Strunk and Reardon, 2010), which more accurately measures the strength of teachers union. Unfortunately due to the novelty of PIIR and sparseness of data there is no publicly available dataset including PIIR measurements at this time. Further work on this topic would be best served using a dataset to measure district strength using the PIIR method.
+
+# 3. Results
+The study finds that union strength has a positive and statistically significant correlation with teacher wages at all stages of a teachers career. Table 2 shows the results using two separate regressions. The partial regression does not control for region or state as districts in Southern states often prohibit collective bargaining. The full model controls for these as well as all other independent variables discussed in section 2.2 above. The remainder of the analysis will be concerned with the full regression model.
+```{r, include=FALSE}
+# DEFINE FORUMLA STUFF
+regressors = c('log(BA.NoExp)~', 'log(BA.10yrs)~', 'log(MS.NoExp)~', 'log(MS.30Cr)~', 'log(MS.20yrs)~')
+
+student_vec = paste(c('HispanicStudents', 'WhiteStudents', 'BlackStudents', 'AmericanIndianStudents', 'AsianStudents', 'EligFreeLunchK.12', 'TotalEnrollment', 'PercStudEligLunchDisc'), collapse='+')
+
+district_vec = paste(c('NumSchools', 'NumContinueTeachers', 'CoreExpendPerPupil', 'CurrExpendPerPupil', 'PercExpendInstruction', 'PercRevFederal', 'PercRevState', 'PercRevLocal', 'DistrictTotExpend', 'HispanicTeachers', 'WhiteTeachers', 'BlackTeachers', 'AmericanIndianTeachers', 'AsianTeachers', 'BenefitRateTeacher'), collapse='+')
+
+community_vec = paste(c('REGION', 'STATE', 'RelatedChildreninPoverty', 'NationSizeRank', 'TotPopinDistrict', 'CEPPNationRank', 'CEPPStateRank'), collapse='+')
+
+partial_community_vec = paste(c('RelatedChildreninPoverty', 'NationSizeRank', 'TotPopinDistrict', 'CEPPNationRank', 'CEPPStateRank'), collapse='+')
+
+# ADD STUFF TO DF
+SASS_CCD$UnionStrength = ifelse(SASS_CCD$UnionAgreement != -8, 1/2*(1-0.2*SASS_CCD$StateUnionRank)+1/2*(SASS_CCD$TCURINST +
+                            SASS_CCD$TCAPOUT + SASS_CCD$TotalEmployeeBenefits)/SASS_CCD$TOTALEXP, 0)
+
+SASS_CCD$StrongUnion = ifelse(SASS_CCD$UnionStrength > median(SASS_CCD$UnionStrength[which(SASS_CCD$UnionStrength != 0)]), 1, 0)
+
+UnionStrength = paste(c('StrongUnion'), collapse='+')
+
+Unionized = paste(c('UnionAgreement'), collapse="+")
+
+# MAKE MODELS
+partial_lm_reg = c()
+partial_lm_sum = c()
+partial_lm_coef = c()
+
+for (regressor in regressors){
+  formula = as.formula(paste(regressor, '+', UnionStrength, "+", Unionized,'+', student_vec, '+', district_vec, '+', partial_community_vec))
+  regr.lm = lm(formula, data=SASS_CCD)
+  partial_lm_reg[[regressor]] = regr.lm
+  partial_lm_sum[[regressor]] = summary(regr.lm)
+  partial_lm_coef[[regressor]] = coefficients(summary(regr.lm))
+}
+
+full_lm_reg = c()
+full_lm_sum = c()
+full_lm_coef = c()
+
+for (regressor in regressors){
+  formula = as.formula(paste(regressor,'+', UnionStrength, "+", Unionized,'+', student_vec, '+', district_vec, '+', community_vec))
+  regr.lm = lm(formula, data=SASS_CCD)
+  full_lm_reg[[regressor]] = regr.lm
+  full_lm_sum[[regressor]] = summary(regr.lm)
+  full_lm_coef[[regressor]] = coefficients(summary(regr.lm))
+}
+
+```
+
+## 3.1 Starting Salary
+```{r table 2, echo=F, results="asis"}
+stargazer(full_lm_reg[1], full_lm_reg[3], partial_lm_reg[1], partial_lm_reg[3], type='latex', keep=c('StrongUnion'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Starting Salary", notes.label='', column.sep.width='-7pt', column.labels=c('Full Regression', 'Partial Regression'), column.separate=c(2,2))
+```
+
+I find strong teachers unions increase starting salary, defined as having no previous teaching experience, by 3.9% for teachers with a bachelors degree and 3.69% for those with a masters degree when compared to weak unions. This finding is statistically significant at the 99% confidence level, as presented in table 2 above. (West and Mykerezi, 2009) find that in general union presence increases starting salary by 3.9%, while my research shows these increases seem to be pulled primarily to stronger unions. More research should be done on the effect of union strength with respect to salary in a teachers first 5 years should this data become publicly available.
+
+## 3.2 Returns to Higher Education
+```{r table 3, echo=F, results="asis"}
+stargazer(full_lm_reg[3], full_lm_reg[4], full_lm_reg[5], partial_lm_reg[3], partial_lm_reg[4], partial_lm_reg[5], type='latex', keep='StrongUnion', digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Returns to Higher Education", notes.label='', column.sep.width='-7pt', column.labels=c('Full Regression', 'Partial Regression'), column.separate=c(3,3))
+```
+We can see that stronger unions reward getting a masters degree less than 10 years of additional experience, a difference of around 1%. Notice that (Goldhaber and Brewer, 1997) find the return to a masters degree has negligible effects on student achievement unless the degree is in the subject they teach. It may be the case that unions are attempting to increase teacher wages regardless of the effect on teacher quality. If this is true the finding is less surprising as a masters degree in education takes on average 2-3 years to complete. Unions then are able to raise member wages much more quickly by working to increase pay for those with a masters degree, and stronger unions are able to more effectively bargain for this than their weaker counterparts.
+
+(West and Mykerezi, 2009) find teachers with both a masters degree and some experience gain the most benefits from union presence. I find teachers pursuing a masters degree with at least 30 completed credits in a district with a strong union earn 3.88% more than those in a weak union. This finding is statistically significant at the 99% confidence level and is 0.19% greater than the return for a masters degree with no experience. However, the group most affected is teachers with a masters degree and 20 years of experience earning 4.4% more for being in a strong union.
+\newpage
+
+## 3.3 Returns to Experience
+```{r table 4, echo=F, results="asis"}
+stargazer(full_lm_reg[2], full_lm_reg[5], partial_lm_reg[2], partial_lm_reg[5], type='latex', keep='StrongUnion', digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Returns to Education", notes.label='', column.sep.width='-7pt', column.labels=c('Full Regression', 'Partial Regression'), column.separate=c(2,2))
+```
+
+We notice in table 4 that strong unions reward experience regardless of education. For a teacher with a bachelors degree and 10 years of experience their is a 4.72% increase in pay associated with being in a strong union. This is 0.82% greater than a bachelors with no experience. For those with a masters degree the expected increase in pay is 4.4%, which is a 0.71% increase from no experience. Surprisingly the greatest expected increase associated with strong unions is for those with a bachelors and 10 years of experience. My finding that the average return for a year of experience (0.47%) is consistent with previous finding that returns to experience for a single year are around 0.6%. The difference could be due to the longer time horizon in my data comparing the first 10 years rather than the first 5 years as in (West and Mykerezi, 2009). These findings show strong unions raise teacher pay earlier in a teachers career which is consistent with previous studies showing the effect union presence in general has on teacher pay early in a teachers career.
+
+# 4. Counterfactuals
+```{r, echo=F}
+CCD99 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD99.csv')
+CCD98 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD98.csv')
+CCD97 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD97.csv')
+CCD96 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD96.csv')
+
+SASS_CCD99 = merge(SASS_CCD, CCD99, by.x="CCDIDLEA", by.y="LEAID")
+SASS_CCD98 = merge(SASS_CCD, CCD98, by.x="CCDIDLEA", by.y="LEAID")
+SASS_CCD97 = merge(SASS_CCD, CCD97, by.x="CCDIDLEA", by.y="LEAID")
+SASS_CCD96 = merge(SASS_CCD, CCD96, by.x="CCDIDLEA", by.y="LEAID")
+
+# 99
+SASS_CCD99$UnionStrength99 = ifelse(SASS_CCD99$UnionAgreement != -8, 1/2*(1-0.2*SASS_CCD99$StateUnionRank)+1/2*(SASS_CCD99$TCURINST.y +
+                            SASS_CCD99$TCAPOUT.y + SASS_CCD99$TotalEmployeeBenefits.y)/SASS_CCD99$TOTALEXP.y, 0)
+
+SASS_CCD99$StrongUnion99 = ifelse(SASS_CCD99$UnionStrength > median(SASS_CCD99$UnionStrength[which(SASS_CCD99$UnionStrength != 0)]), 1, 0)
+
+SASS_CCD99$DeltaStrength = abs(SASS_CCD99$UnionStrength - SASS_CCD99$UnionStrength99)
+
+# 98
+SASS_CCD98$UnionStrength98 = ifelse(SASS_CCD98$UnionAgreement != -8, 1/2*(1-0.2*SASS_CCD98$StateUnionRank)+1/2*(SASS_CCD98$TCURINST.y +
+                            SASS_CCD98$TCAPOUT.y + SASS_CCD98$TotalEmployeeBenefits.y)/SASS_CCD98$TOTALEXP.y, 0)
+
+SASS_CCD98$StrongUnion98 = ifelse(SASS_CCD98$UnionStrength > median(SASS_CCD98$UnionStrength[which(SASS_CCD98$UnionStrength != 0)]), 1, 0)
+
+SASS_CCD98$DeltaStrength = abs(SASS_CCD98$UnionStrength - SASS_CCD98$UnionStrength98)
+
+# 97
+SASS_CCD97$UnionStrength97 = ifelse(SASS_CCD97$UnionAgreement != -8, 1/2*(1-0.2*SASS_CCD97$StateUnionRank)+1/2*(SASS_CCD97$TCURINST.y +
+                            SASS_CCD97$TCAPOUT.y + SASS_CCD97$TotalEmployeeBenefits.y)/SASS_CCD97$TOTALEXP.y, 0)
+
+SASS_CCD97$StrongUnion97 = ifelse(SASS_CCD97$UnionStrength > median(SASS_CCD97$UnionStrength[which(SASS_CCD97$UnionStrength != 0)]), 1, 0)
+
+SASS_CCD97$DeltaStrength = abs(SASS_CCD97$UnionStrength - SASS_CCD97$UnionStrength97)
+
+# 96
+SASS_CCD96$UnionStrength96 = ifelse(SASS_CCD96$UnionAgreement != -8, 1/2*(1-0.2*SASS_CCD96$StateUnionRank)+1/2*(SASS_CCD96$TCURINST.y +
+                            SASS_CCD96$TCAPOUT.y + SASS_CCD96$TotalEmployeeBenefits.y)/SASS_CCD96$TOTALEXP.y, 0)
+
+SASS_CCD96$StrongUnion96 = ifelse(SASS_CCD96$UnionStrength > median(SASS_CCD96$UnionStrength[which(SASS_CCD96$UnionStrength != 0)]), 1, 0)
+
+SASS_CCD96$DeltaStrength = abs(SASS_CCD96$UnionStrength - SASS_CCD96$UnionStrength96)
+
+
+# Example plotting for appendix piece on simultaneity
+p = ggplot(data=SASS_CCD96, mapping = aes(UnionStrength96, UnionStrength, color=REGION))
+
+#p + geom_point() + geom_abline(a=0, b=1)
+
+#summary(which(!is.na(SASS_CCD99$DeltaStrength)))
+
+####### IV SEP LINE ########
+
+test_IV = merge(SASS_CCD, SASS_CCD96[,c('StateSizeRank', 'CCDIDLEA')], by='CCDIDLEA')
+
+first_stage_reg = paste(c('UnionStrength~'), collapse='+')
+
+IV_reg = paste(c('StateSizeRank.y'), collapse='+')
+
+formula = as.formula(paste(first_stage_reg, '+', IV_reg,'+', student_vec, '+', district_vec, '+', community_vec))
+
+first_stage_ols = lm(formula, data=test_IV)
+
+test_IV$IV_hat = NULL
+
+test_IV$IV_hat = predict(first_stage_ols, newdata = test_IV, na.action=na.omit)
+
+test_IV$StrongUnionIV = ifelse(test_IV$IV_hat > median(test_IV$IV_hat[which(test_IV$IV_hat != 0)]), 1, 0)
+
+IV = paste(c('StrongUnionIV'), collapse='+')
+
+second_stage_testreg = paste(c('log(BA.NoExp)~'), collapse='+')
+
+second_stage_formula = as.formula(paste(second_stage_testreg,'+', IV, '+', student_vec, '+', district_vec, '+', community_vec))
+
+second_stage_ols = lm(second_stage_formula, data=test_IV)
+
+```
+
+We are now concerned with the possible endogeneity of union strength estimates. We start by inspecting possible simultaneity issues through examining union strength estimates over time. I find that the measure for union strength used in this study is relatively time invariant and so it is unlikely to bias our regressions. Stronger unions may have formed at more union-friendly times or places creating strong unions rather than having gained strength over time. This is consistent with previous findings involving the effect of union presence on teacher pay. More information can be found in appendix A.
+
+A second possible bias could come from omitted variables. (Hoxby, 1996) shows that OLS estimates of union presence on teacher pay may be biased downwards. Accounting for endogeneity using instrumental variables she finds higher estimates of the effect union presence has on wages in general, which indicates a possible omitted variable bias with union strength as well. We use the state size ranking for the district as our instrumental variable. This is because district size is related to union strength and we're able to control for the effect it has on teacher pay by holding state and region variables constant.
+
+The IV estimates are unexpectedly smaller than the OLS findings which may lead us to believe we have some omitted variables which we should control for in our OLS estimates. These may be related to the impact state and region controls have on our IV. When controlling for state and region in an OLS regression we find a lower estimate for teachers with less experience, but notice that these controls are likely to bias our estimation because southern states often prohibit collective bargaining. Another reason could be that the measurement of union strength is inaccurate. The measure of union strength is largely based on financial data which may weight union strength in favor of larger and more wealthy districts. More information on the methods and results of the IV and 2SLS refer to appendix B.
+
+# 5. Conclusions
+This study finds union strength has a large effect on teachers wages when comparing strong unions to their weaker counterparts and provides insight into the groups most effected by this. It's important for both union members and district representatives to be aware of the strength a union holds when working towards restructured compensation. The estimates are largely consistent with previous work regarding the effect of union presence in general while highlighting the differences strong and weak unions have on this effect. 
+
+While this paper provides evidence to suggest that strong teachers unions can play a larger role in teachers wages than previously known I again note the proxy for union strength can be improved using a PIIR method. Once this data becomes more widely available additional research into the effect union strength plays on teachers wages should be conducted. Along with this an expanded pay schedule would help to provide better insight into the effect stronger unions have on teachers early wages. The first 2-3 years of teaching experience are important for teacher quality and research into the effect of union strength on these years should be conducted when data becomes available.
+
+## Appendix A
+```{r, echo=F}
+a = ggplot(data=SASS_CCD99, mapping = aes(UnionStrength99, UnionStrength, color=REGION))
+b = ggplot(data=SASS_CCD98, mapping = aes(UnionStrength98, UnionStrength, color=REGION))
+c = ggplot(data=SASS_CCD97, mapping = aes(UnionStrength97, UnionStrength, color=REGION))
+d = ggplot(data=SASS_CCD96, mapping = aes(UnionStrength96, UnionStrength, color=REGION))
+
+d + geom_point() + geom_abline(a=0, b=1)
+```
+
+The above graph shows a lagged estimate of union strength from 1996 exhibiting a relatively time invariant measure of union strength.
+
+\newpage
+## Appendix B
+```{r, echo=F}
+
+IV_regs = c()
+
+for (regressor in regressors){
+  formula = as.formula(paste(regressor,'+', IV, '+', student_vec, 
+                              '+', district_vec, '+', community_vec))
+  regr.lm = lm(formula, data=test_IV)
+  IV_regs[[regressor]] = regr.lm
+}
+
+```
+
+```{r table 5, echo=F, results="asis"}
+stargazer(IV_regs[1], IV_regs[2], IV_regs[3], IV_regs[4], IV_regs[5], type='latex', keep='StrongUnion', digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Instrumental Variable Summary Statistics", notes.label='', column.sep.width = '-7pt')
+```
+
+We analyze the methods and results from the IV estimates here. I chose to use a lagged state ranking for size as the IV because of its strong correlation with union strength. We use a lagged instrument to take care of any contemporary events that affect teacher pay based on district size and union strength. Once we control for region and state as well we can be confident that the state ranking for size is uncorrelated with teacher pay at all education and experience levels. Performing this regression we find more exaggerated effects than with OLS. As table 5 shows we have much higher returns to experience than with OLS but lower returns to starting salaries. These findings give reason to believe the IV estimates form bounds for the actual effect of union strength on teachers wages. They follow previous findings of union presence affecting teachers wage, but more studies should be done with more accurate measures of union strength as well as different levels of the pay schedules.
+
+# References
+
+Eberts, R. W. “Teachers Unions and Student Performance: Help or Hindrance?” The Future of Children 17, no. 1 (2007): 175–200. https://doi.org/10.1353/foc.2007.0001.
+
+Goldhaber, D. D., and D. J. Brewer. “Evaluating the Effect of Teacher Degree Level on Educational Performance.” National Center for Education Statistics, 1997, 197–210.
+
+Hoxby, C. M. “How Teachers Unions Affect Education Production.” The Quarterly Journal of Economics 111, no. 3 (January 1996): 671–718. https://doi.org/10.2307/2946669.
+
+Merkle, J. S., and M. A. Phillips. “The Wage Impact Of Teachers Unions: A Meta-Analysis.” Contemporary Economic Policy 36, no. 1 (2017): 93–115. https://doi.org/10.1111/coep.12234.
+
+Strunk, K. O., and S. F. Reardon. “Measuring the Strength of Teachers Unions.” Journal of Educational and Behavioral Statistics 35, no. 6 (2010): 629–70. https://doi.org/10.3102/1076998609359790.
+
+West, K. L, and E. Mykerezi. “Teachers’ Unions and Compensation: The Impact of Collective Bargaining on Salary Schedules and Performance Pay Schemes.” Economics of Education Review 30, no. 1 (2011): 99–108. https://doi.org/10.1016/j.econedurev.2010.07.007.
+
+Winkler, A. M., J. Scull, and D. Zeehandelaar. “How Strong Are U.S. Teacher Unions? A State by State Comparison.” Thomas B. Fordham Institute, October 2012.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,92 @@
+General Notes:
+    - Michigan teachers have to opt-out of MEA union and so the data
+    will be biased as those who don't unionize are choosing so and
+    those who do are either unaware or choosing to stay. Either way we
+    won't be able to use these aside from looking at varying union strength
+    across Michigan counties which won't provide the effect we're looking for.
+
+    - Perhaps we can use the June 2018 supreme court ruling that prohibits
+    unions from collecting fees from non-members for collective Bargaining
+    and other similar uses as our 'marker' and take a look at those who left
+    and those who stayed. While this introduces a selection bias there may
+    not be many other ways and we could find ways to work out this bias.
+    I believe this to be the case as prior to the ruling the members had
+    remained union members and non-members simply had to pay in. While this
+    may introduce selection bias still as non-members had chosen to opt-out
+    earlier in their career this doesn't have to be the case. Many of these
+    non-members disagreed with the politics of national and state level agency
+    not the local union and CBA representing them. Looking at non-member wage
+    compared to member wage before and after the ruling could provide some
+    insight as to the difference in wages.
+
+    - Using Strunks PIIR method to evaluate coefficients for a hedonic
+    pricing model of wages could help us to find the exact difference
+    between the union and non-union districts.
+
+    - Washington CBA data shows strong correlation between full range of
+    provisions and the reduced cutting from 660(1) down to 220(.88) and then even
+    further cuts(.75) can be made without loss of generality. If we can
+    get this data we can compare counties to build our hedonic model and Then
+    plug in provisions from non-union counties to find what the difference in
+    unionized pay is because the hedonic model will have controlled for
+    variation across non-monetary incentives like class size and the like.
+
+    - Consider using a less accurate measure for teacher influence by using
+    PIIR to measure union strength and then checking teacher wage across a large
+    number of districts with these unions. It would help to establish some estimate of
+    what makes strong unions different from weak ones and non-existent ones.
+    - This could also let us look at spillover effects of having strong Unions
+    in one place and weaker in another perhaps supporting a spatial study as well.
+
+Dan Goldhaber: CBA work
+  Paper: Teacher Collective Bargaining: Assessing the Internal Validity of
+  Partial Independence Item Response Measures of Contract Restrictiveness
+    - PIIR method could allow us to do an analysis across different unions
+    restrictiveness by type of restrictiveness and then compare these to less
+    and more restrictive districts. Then we can hopefully compare these
+    non-monetary values of teacher incentives by cancelling them out when
+    we compare districts to non-union districts.
+        - Extensive research has been done with Washington schools and should
+        be considered a strong candidate for this research.
+    - This paper tells us that using restricted provisions provided
+    they're the right provisions will yield similar results of restrictiveness
+    and can be categorized by provision. This should let us perform some
+    analysis on groups of these districts to find the 'value' of each
+    provision and then set these plus some actual wage equal to the real wage
+    of a unionized teacher. Then we can read through provisions of non-unionized
+    districts with similar demographics, income percentiles, etc. and find
+    what they'd be expected to make as a union worker. This difference should
+    capture what we're looking for.
+	- Look for TR3 data set 
+
+Katharine Strunk: Union Work
+  Paper: It is in the Contract: How the Policies Set in Teachers’ Unions’
+  Collective Bargaining Agreements Vary Across States and Districts
+    - Look into CBA differences across Districts
+      - CBA: Collective Bargaining Agreements are the driving force behind
+      many of the decisions made in schools
+      - California has the first set of rich data displaying differences
+      across the CBA by districts
+      - Pay is scheduled among Washington CBA and so is omitted. However
+      this data could be useful if it varies across union and non-Union
+      workers and should be explored and asked for if possible.
+      - Page 9 describes another paper answering as to why the estimates
+      will be non-causal and should be read as well. On top of this it
+      points out the models used to perform analysis
+      - Michigan has much more strict bargaining policy and could be used
+      to control for more biased variables.
+      - District size is a large predictor for CBA length and issues
+      at least as compared to poverty levels although lower poverty
+      levels are correlated with less preparation time for high schools
+      and larger class sizes and maximum class sizes although this too
+      varies across states and districts.
+
+http://data.kitsapsun.com/projects/wa-school/
+    - This is a great source for some data on Washington salary schedule.
+
+https://fordhaminstitute.org/ohio/commentary/unionized-teacher-salaries
+    - Commentary on union pay compared to non-union pay, this is
+    supplemented with studies.
+    - Provides union strength by state, can be used to find similarity and
+    allow for cross state evaluations if we find similar CBA districts that
+    are across state lines.
