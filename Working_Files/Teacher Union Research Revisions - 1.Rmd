@@ -15,23 +15,23 @@ library(tidyr)
 ```
 
 # Abstract
-This paper examines the relationship between the strength of teachers union and their impact on instructor wages at the district level. I find evidence of different incentives for strong union representatives when compared to their weaker counterparts. I use data from the 1999-2000 School and Staffing Survey (SASS) along with fiscal data from Common Core Data (CCD). I develop a proxy measure for union strength at the district level and find that stronger unions yield an expected increase of 3.52% in teachers' first year salaries. Further I find strong unions have returns as high as 4.95% for the first 10 years of experience compared to their weaker counterparts.
+In this paper I examine the relationship between the strength of teachers union and their impact on wages at the district level. I find evidence of different incentives for strong union representatives when compared to their weaker counterparts; there is suggestive evidence that strong unions tend to serve members with the longest tenure. I use data from the 1999-2000 School and Staffing Survey (SASS) along with fiscal data from Common Core Data (CCD). I develop a proxy measure for union strength at the district level and find that stronger unions yield an expected increase of 3.52% in teachers' first year salaries while those with 10 years of experience have returns as high as 4.95%.
 
 # 1. Introduction
 American unions have been in decline since their heyday in the 1970's and 1980's; regardless, teachers unions remain an important part of the American education system and play a large role in the development of education policies. Despite large amounts of research regarding the effect of teachers unions in general, few have explored the impact of union strength on instructor wages. Teachers unions operate and largely bargain at a district level which gives evidence to suggest heterogeneity with respect to size, effect on outcomes, bargaining power and more; because of this heterogeneity we suspect there exists an underlying relationship between union strength and teacher compensation.
+#######MERGE########
+This paper attempts to quantify this relationship between strong unions and teacher pay across varying levels of education and experience. The findings indicate strong unions increase pay as much as 5.73% when compared to their weaker counterparts. We also see a significant difference in wage increases comparing the various combinations of education and experience suggesting strong unions may provide different incentives to higher education and years of experience than weaker ones.
 
 Teachers wages are most commonly decided with a pay schedule relying largely on total education and years of experience, but teacher compensation is not defined entirely by wages. Benefits such as life, dental, and medical insurance are all relevant to employment contracts and teacher compensation is unique in the non-pecuniary inputs. This study also considers the urbanicity of a district, racial composition of students and faculty, indicators of the district's economic health, and more. These inputs are discussed in depth in section 2. By using observed characteristics from the School and Staffing Survey along with Common Core Data we're able to reliably estimate teacher wages and determine the effect of union strength on teacher compensation.
-
-This paper attempts to quantify the relationship between strong unions and teacher pay across varying levels of education and experience. The findings indicate strong unions increase pay as much as 5.73% when compared to their weaker counterparts. We also see a significant difference in wage increases comparing the various combinations of education and experience suggesting strong unions may provide different incentives to higher education and years of experience than weaker ones.
-
+#######CONNECTBETTER########
 Many studies have worked to estimate teacher union impact on student achievement (Hoxby 1996; Eberts 2007) as well as the union wage effect (Merkle and Phillips, 2017), but few have examined the impact of union strength. This is an important derivative of studying unions that is often overlooked because of a lack of reliable measurements. I have created a proxy for union strength that is used to analyze the effect of union strength on teacher pay. This analysis uncovers the differences between strong and weak union effects on teacher pay and I believe similar proxies may be formed to analyze other institutions.
 
 Section 2 will cover the data sources and shortcomings, the proxy measure for union strength, and econometric methods used in the analysis. Section 3 covers the results from our regressions as well as a discussion of the findings. Finally section 4 is used to discuss the possible endogeneity of union strength with teacher pay, the significance of the research, and suggestions for future research.
 
 ```{r, include=FALSE}
-SASS = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/SASS data/Clean_SASS.csv')
+SASS = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/SASS data/Clean_SASS.csv')
 
-CCD = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD.csv')
+CCD = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/Common Core data/Clean_CCD.csv')
 
 SASS_CCD = merge(SASS, CCD, by.x="CCDIDLEA", by.y="LEAID")
 
@@ -87,18 +87,16 @@ I measure union strength at the district level using two constructions. Firstly 
 $$
 UnionStrength = \frac{1}{2}\times ((1-0.2\times S) + ((I+C+B)/T))
 $$
-Where $S$ is state rank, $I$ is instructor salary, $C$ is capital outlay, $B$ is employee benefits, and $T$ is total expenditures. This measure gives equal weight to the state rank and the proxy measure for district level union strength. It returns a value between 0 and 1 that approximates union strength. We then use this value to assign unions to be either strong or weak based on the median strength across all districts. Because $UnionStrength$ is based on ratios of fiscal data and state ranking it is not biased towards larger districts which appropriates the choice to use medians as an assignment factor.
-
-I would like to note there exists new methods of measuring union strength, the Partial Item Independent Response (Strunk and Reardon, 2010), which more accurately measures the strength of teachers union. Unfortunately due to the novelty of PIIR and sparseness of data there is no publicly available dataset including PIIR measurements at this time. Further work on this topic would be best served using a dataset to measure district strength using the PIIR method.
+Where $S$ is state rank, $I$ is instructor salary, $C$ is capital outlay, $B$ is employee benefits, and $T$ is total expenditures. This measure gives equal weight to the state rank and the proxy measure for district level union strength. It returns a value between 0 and 1 that approximates union strength. We then use this value to assign unions to be either strong or weak based on the median strength across all districts. Because $UnionStrength$ is based on ratios of fiscal data and state ranking it is not biased towards larger districts which appropriates the choice to use medians as an assignment factor. This median split is what classifies our binary $StrongUnion$ variable. This is done for ease of interpretation, however, we include the regressions using $UnionStrength$ in Appendix A.
 
 ## 2.3 Econometric Model
 I use a model similar to West and Mykerezi (2009) to estimate the effects of union strength on teacher pay. We estimate teacher pay with teacher characteristics $i$ corresponding to the teachers education and years of experience using a set of vectors to hold constant student, school district, and community effects. The student characteristics include the student body racial composition, eligibility for free or reduced price lunch, the total enrollment of K-12 students in the district, and the number of migrant students. The school district array includes the number of schools, the number of continuing teachers, the core and total expenditures per pupil, the expenditures on instructional salaries, the revenue split by source, total expenditures, the racial composition of teachers, and the benefit rate[^3]. The community array captures the region, state, urbanicity, related children in poverty, national and state size ranking, total population in the district, and capital outlay expenditures. The equation is given as follows.
 
 $$
-Pay_{i} = \beta_{0,i} + \beta_{1,i}*UnionStrength + \beta_{2,i}*DistrictControls + \varepsilon
+Pay_{i} = \beta_{0} + \beta_{1}*UnionStrength_{i} + \beta_{2}*DistrictControls_{i} + \varepsilon_{i}
 $$
-
-The district controls discussed above explain a significant amount of teacher pay ($R^2=0.77$). Because of this I'm confident in the findings made although I recognize the possibility of endogeneity between union strength and teacher pay. I use lagged union strength estimates along with an instrumental variable approach to examine this problem in depth in section 4.
+#######ADDMORESTUFFHERE########
+Using the district controls described above there is a significant amount of explainable variation in the data ($R^2=0.77$). I use lagged union strength estimates along with an instrumental variable approach to examine this problem in depth in section 4.
 
 [^3]: The benefit rate is a constructed measure from SASS that uses spending on all benefits (dental, life, etc.) as inputs and returns the strength of this benefit package.
 
@@ -154,28 +152,28 @@ SASS_CCD_long$UnionStrength = ifelse(SASS_CCD_long$UnionAgreement != -8, 1/2*(1-
 
 SASS_CCD_long$StrongUnion = ifelse(SASS_CCD_long$UnionStrength > median(SASS_CCD_long$UnionStrength[which(SASS_CCD_long$UnionStrength != 0)]), 1, 0)
 
+formula = as.formula(paste(trial_reg, '+', UnionStrength, "+", Unionized,'+', student_vec, '+', district_vec, '+', community_vec))
+
+pay_reg_none = lm(formula, data=SASS_CCD_long)
+
+formula = as.formula(paste(trial_reg, '+', dummy, '+', UnionStrength, "+", Unionized,'+', student_vec, '+', district_vec, '+', community_vec))
+
+pay_reg_some = lm(formula, data=SASS_CCD_long)
+
 formula = as.formula(paste(trial_reg, '+', dummy, '+', interaction_term, '+', UnionStrength, "+", Unionized,'+', student_vec, '+', district_vec, '+', community_vec))
 
-pay_reg = lm(formula, data=SASS_CCD_long)
+pay_reg_all = lm(formula, data=SASS_CCD_long)
 
 ```
 
 ```{r table 2, echo=F, results="asis"}
-stargazer(pay_reg, type='latex', keep=c('StrongUnion'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Union Strength Effects", notes.label='', column.sep.width='-7pt', header=F)
+stargazer(pay_reg_none, pay_reg_some, pay_reg_all, type='latex', keep=c('StrongUnion', 'ExpAndEduc', 'Constant'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Union Strength Effects", notes='BA.NoExp is our base level.',notes.align='l', column.sep.width='-7pt', header=F, order=c(5, 1,2,3,4,6,7,8,9))
 ```
-\newpage
 
 ## 3.1 Starting Salary
-```{r table 3, echo=F, results="asis", include=F}
-stargazer(full_lm_reg[1], full_lm_reg[3], type='latex', keep=c('StrongUnion'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Starting Salary", notes.label='', column.sep.width='-7pt')
-```
-
-I find strong teachers unions increase starting salary, defined as having no previous teaching experience, by 3.52% for teachers with a bachelors degree and 3.25% for those with a masters degree when compared to weak unions. This finding is statistically significant at the 99% confidence level, as presented in table 2 above. These findings isolate the difference in pay for strong unions when compared to weak unions, which when compounded with West and Mykerezi(2009) greatly increase teacher pay. This would mean a teacher who earns \$25,000 annually could be earning as much as \$26,500 if they were to join a strong teachers union. For teachers in a weak union earning earning \$25,000 the increase in pay for strengthening the union can be as much as \$880 annually. Due to the non-trivial pay increases in starting salary more research should be done on the effect of union strength with respect to salary in a teachers first 5 years should this data become publicly available.
+I find strong teachers unions increase starting salary, defined as having no previous teaching experience, by 3.58% for teachers with a bachelors degree and 3.17% for those with a masters degree when compared to weak unions. This finding is statistically significant at the 99% confidence level, as presented in table 2 above. These findings isolate the difference in pay for strong unions when compared to weak unions, which when compounded with West and Mykerezi(2009) greatly increase teacher pay. This would mean a teacher who earns \$25,000 annually could be earning as much as \$26,500 if they were to join a strong teachers union. For teachers in a weak union earning earning \$25,000 the increase in pay for strengthening the union can be as much as \$880 annually. Due to the non-trivial pay increases in starting salary more research should be done on the effect of union strength with respect to salary in a teachers first 5 years should this data become publicly available.
 
 ## 3.2 Returns to Higher Education
-```{r table 4, echo=F, results="asis", include=F}
-stargazer(full_lm_reg[3], full_lm_reg[4], full_lm_reg[5], type='latex', keep='StrongUnion', digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Returns to Higher Education", notes.label='', column.sep.width='-7pt')
-```
 We can see that stronger unions reward getting a masters degree much less than 10 years of additional experience, a difference of around 1.43%. Notice that (Goldhaber and Brewer, 1997) find the return to a masters degree has negligible effects on student achievement unless the degree is in the subject they teach. Perhaps unions acknowledge this and instead promote gaining experience teaching rather than pursuing higher education. It may also be the case that strong unions are primarily controlled by the members with the longest tenure in the organization. If this is true then stronger unions are driven by those who have the most teaching experience as well and so it's reasonable to believe they promote their own interests first and concede on teacher pay increases for early experience.
 
 West and Mykerezi(2009) find teachers with both a masters degree and some experience gain the most benefits from union presence. I find teachers pursuing a masters degree with at least 30 completed credits in a district with a strong union earn 3.25% more than those in a weak union. This finding is greater than those with a masters degree and no expereience (3.13%). However, the group most affected is teachers with a masters degree and 20 years of experience earning 5.73% more for being in a strong union.
@@ -189,10 +187,10 @@ We notice in table 2 that strong unions heavily reward experience regardless of 
 
 # 4. Discussion
 ```{r, echo=F}
-CCD99 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD99.csv')
-CCD98 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD98.csv')
-CCD97 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD97.csv')
-CCD96 = read.csv('/Users/rileylatham/Downloads/Independent_Study/Data_Pool/Common Core data/Clean_CCD96.csv')
+CCD99 = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/Common Core data/Clean_CCD99.csv')
+CCD98 = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/Common Core data/Clean_CCD98.csv')
+CCD97 = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/Common Core data/Clean_CCD97.csv')
+CCD96 = read.csv('/Users/rileylatham/Downloads/Teacher_Union_Research/Data_Pool/Common Core data/Clean_CCD96.csv')
 
 SASS_CCD99 = merge(SASS_CCD, CCD99, by.x="CCDIDLEA", by.y="LEAID")
 SASS_CCD98 = merge(SASS_CCD, CCD98, by.x="CCDIDLEA", by.y="LEAID")
@@ -278,6 +276,27 @@ This study finds union strength has a large effect on teachers wages when compar
 
 While this paper provides evidence to suggest that strong teachers unions can play a larger role in teachers wages than previously known I again note the proxy for union strength can be improved using a PIIR method. Once this data becomes more widely available additional research into the effect union strength plays on teachers wages should be conducted. Along with this an expanded pay schedule would help to provide better insight into the effect stronger unions have on teachers early wages. The first 2-3 years of teaching experience are important for teacher quality and research into the effect of union strength on these years should be conducted when data becomes available.
 
+# Acknowledgements
+I'd like to thank Professor Bushong for working with me throughout this process and acting as a referee for the editing, as well as Professor Strunk for her help in creating the union strength proxy measurements. Without them this paper would not have been possible. All errors and omissions are my own.
+
+# References
+
+Eberts, R. W. “Teachers Unions and Student Performance: Help or Hindrance?” The Future of Children 17, no. 1 (2007): 175–200. https://doi.org/10.1353/foc.2007.0001.
+
+Goldhaber, D. D., and D. J. Brewer. “Evaluating the Effect of Teacher Degree Level on Educational Performance.” National Center for Education Statistics, 1997, 197–210.
+
+Hoxby, C. M. “How Teachers Unions Affect Education Production.” The Quarterly Journal of Economics 111, no. 3 (January 1996): 671–718. https://doi.org/10.2307/2946669.
+
+Merkle, J. S., and M. A. Phillips. “The Wage Impact Of Teachers Unions: A Meta-Analysis.” Contemporary Economic Policy 36, no. 1 (2017): 93–115. https://doi.org/10.1111/coep.12234.
+
+Strunk, K. O., and S. F. Reardon. “Measuring the Strength of Teachers Unions.” Journal of Educational and Behavioral Statistics 35, no. 6 (2010): 629–70. https://doi.org/10.3102/1076998609359790.
+
+West, K. L, and E. Mykerezi. “Teachers’ Unions and Compensation: The Impact of Collective Bargaining on Salary Schedules and Performance Pay Schemes.” Economics of Education Review 30, no. 1 (2011): 99–108. https://doi.org/10.1016/j.econedurev.2010.07.007.
+
+Winkler, A. M., J. Scull, and D. Zeehandelaar. “How Strong Are U.S. Teacher Unions? A State by State Comparison.” Thomas B. Fordham Institute, October 2012.
+
+\newpage
+
 ## Appendix A
 ```{r, echo=F, warning=F, fig.height=5, fig.width=6, fig.align='center'}
 a = ggplot(data=SASS_CCD99, mapping = aes(UnionStrength99, UnionStrength, color=REGION))
@@ -320,7 +339,7 @@ SASS_CCD96_long = SASS_CCD96_long[!(SASS_CCD96_long$Pay==-8),]
 
 # Create our IV dummy and interaction term
 dummy_IV = paste(c('ExpAndEduc'), collapse='+')
-interaction_term_IV = paste(c('ExpAndEduc*StrongUnion'), collapse='+')
+interaction_term_IV = paste(c('ExpAndEduc*StrongUnionIV'), collapse='+')
 
 pay_IV = merge(SASS_CCD_long, SASS_CCD96_long[,c('StateSizeRank', 'CCDIDLEA')], by='CCDIDLEA')
 
@@ -352,34 +371,10 @@ rel_reg = lm(UnionStrength~StateSizeRank, data=SASS_CCD96_long)
 ```
 
 ```{r table 7, echo=F, results="asis"}
-stargazer(second_stage_pay_ols, type='latex', keep=c('StrongUnion'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Instrumental Variable Summary Statistics", notes.label='', column.sep.width = '-7pt', header=F)
+stargazer(second_stage_pay_ols, type='latex', keep=c('StrongUnionIV'), digits=4, omit.stat=c('f', 'rsq', 'ser'), title="Instrumental Variable Summary Statistics", notes='BA.NoExp is our base level.', notes.align = 'l', column.sep.width = '-7pt', header=F)
 ```
 
-We analyze the methods and results from the IV estimates here. I chose to use a lagged state ranking for size as the IV because of its strong correlation with union strength. We use a lagged instrument to take care of any contemporary events that affect teacher pay based on district size and union strength. Once we control for region and state as well we can be confident that the state ranking for size is uncorrelated with teacher pay at all education and experience levels. Performing this regression we find more exaggerated effects than with OLS. As table 5 shows we have much lower returns to all levels of education and experience. These findings give reason to believe the IV estimates form lower bounds for the actual effect of union strength on teachers wages. They follow previous findings of union presence affecting teachers wage, but more studies should be done with more accurate measures of union strength as well as different levels of the pay schedules.
-\newpage
-
-# Acknowledgements
-I'd like to thank Professor Bushong for working with me throughout this process and acting as a referee for the editing, as well as Professor Strunk for her help in creating the union strength proxy measurements. Without them this paper would not have been possible. All errors and omissions are my own.
-
-# References
-
-Eberts, R. W. “Teachers Unions and Student Performance: Help or Hindrance?” The Future of Children 17, no. 1 (2007): 175–200. https://doi.org/10.1353/foc.2007.0001.
-
-Goldhaber, D. D., and D. J. Brewer. “Evaluating the Effect of Teacher Degree Level on Educational Performance.” National Center for Education Statistics, 1997, 197–210.
-
-Hoxby, C. M. “How Teachers Unions Affect Education Production.” The Quarterly Journal of Economics 111, no. 3 (January 1996): 671–718. https://doi.org/10.2307/2946669.
-
-Merkle, J. S., and M. A. Phillips. “The Wage Impact Of Teachers Unions: A Meta-Analysis.” Contemporary Economic Policy 36, no. 1 (2017): 93–115. https://doi.org/10.1111/coep.12234.
-
-Strunk, K. O., and S. F. Reardon. “Measuring the Strength of Teachers Unions.” Journal of Educational and Behavioral Statistics 35, no. 6 (2010): 629–70. https://doi.org/10.3102/1076998609359790.
-
-West, K. L, and E. Mykerezi. “Teachers’ Unions and Compensation: The Impact of Collective Bargaining on Salary Schedules and Performance Pay Schemes.” Economics of Education Review 30, no. 1 (2011): 99–108. https://doi.org/10.1016/j.econedurev.2010.07.007.
-
-Winkler, A. M., J. Scull, and D. Zeehandelaar. “How Strong Are U.S. Teacher Unions? A State by State Comparison.” Thomas B. Fordham Institute, October 2012.
-
-
-
-
+We analyze the methods and results from the IV estimates here. I chose to use a lagged state ranking for size as the IV because of its strong correlation with union strength. We use a lagged instrument to take care of any contemporary events that affect teacher pay based on district size and union strength. Once we control for region and state as well we can be confident that the state ranking for size is uncorrelated with teacher pay at all education and experience levels. Performing this regression we find more exaggerated effects than with OLS. As table 5 shows we have much lower returns to education than predicted by OLS, but much higher returns to experience. These findings give reason to believe the IV estimates form lower bounds for the actual effect of union strength on teachers wages for education, and upper bounds for the union strength effect on experience. They follow previous findings of union presence affecting teachers wage, but more studies should be done with more accurate measures of union strength as well as different levels of the pay schedules.
 
 
 
